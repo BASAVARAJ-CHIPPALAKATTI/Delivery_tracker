@@ -10,7 +10,7 @@ const openai = new OpenAI({
     apiKey: OPENAI_API_KEY
 });
 
-const DELAY_WEATHER = ['Rain', 'Snow', 'Thunderstorm', 'Drizzle', 'Extreme'];
+const DELAY_WEATHER = ['Rain', 'Snow', 'Extreme'];
 
 async function fetchWeather(order) {
     const city = order.city;
