@@ -3,9 +3,7 @@
     "order_id": "1001",
     "customer": "Alice Smith",
     "city": "New York",
-    "status": "Delayed",
-    "weather": "Rain",
-    "apology": "Hi Alice Smith, your order to New York is delayed due to Rain. We appreciate your patience!"
+    "status": "Pending"
   },
   {
     "order_id": "1002",
@@ -16,14 +14,13 @@
   {
     "order_id": "1003",
     "customer": "Charlie Green",
-    "city": "London",
+    "city": "Bangalore",
     "status": "Pending"
   },
   {
     "order_id": "1004",
     "customer": "InvalidCity123",
     "city": "InvalidCity123",
-    "status": "Pending",
-    "error": "City not found"
+    "status": "Pending"
   }
 ]
