@@ -10,7 +10,7 @@ const openai = new OpenAI({
     apiKey: OPENAI_API_KEY
 });
 
-const DELAY_WEATHER = ['Rain', 'Snow', 'Extreme'];
+const DELAY_WEATHER = ['Rain', 'Snow', 'Thunderstorm', 'Drizzle', 'Extreme'];
 
 async function fetchWeather(order) {
     const city = order.city;
@@ -129,25 +129,29 @@ async function main() {
     console.log(`⏰ Started at: ${new Date().toLocaleTimeString()}\n`);
     
     try {
+        // STEP 1: Read original orders.json
         console.log('📁 STEP 1: Reading orders.json...');
         const fileContent = await fs.readFile('orders.json', 'utf8');
-        const orders = JSON.parse(fileContent);
-        console.log(`  ✅ Loaded ${orders.length} orders\n`);
+        const originalOrders = JSON.parse(fileContent);
+        console.log(`  ✅ Loaded ${originalOrders.length} orders from orders.json\n`);
         
+        // STEP 2: Fetch weather for ALL cities in PARALLEL
         console.log('🌐 STEP 2: Fetching weather data (PARALLEL)...');
         console.log('  Note: All cities are being fetched simultaneously!\n');
         
-        const weatherPromises = orders.map(order => fetchWeather(order));
+        const weatherPromises = originalOrders.map(order => fetchWeather(order));
         const ordersWithWeather = await Promise.all(weatherPromises);
         
         console.log('\n✅ Weather data fetched for all cities!\n');
         
+        // STEP 3: Generate AI apologies for delayed orders (PARALLEL)
         console.log('🤖 STEP 3: Generating AI apologies (PARALLEL)...');
         console.log('  Note: Only generating for delayed orders.\n');
         
         const apologyPromises = ordersWithWeather.map(order => generateApology(order));
         const apologies = await Promise.all(apologyPromises);
         
+        // Merge apologies into orders
         const finalOrders = ordersWithWeather.map((order, index) => {
             if (apologies[index]) {
                 return { ...order, apology: apologies[index] };
@@ -157,10 +161,12 @@ async function main() {
         
         console.log('\n✅ Apologies generated!\n');
         
+        // STEP 4: Save UPDATED orders to orders_updated.json (NEW FILE)
         console.log('💾 STEP 4: Saving updated orders...');
-        await fs.writeFile('orders.json', JSON.stringify(finalOrders, null, 2));
-        console.log('  ✅ File saved successfully!\n');
+        await fs.writeFile('orders_updated.json', JSON.stringify(finalOrders, null, 2));
+        console.log('  ✅ Saved to orders_updated.json (original orders.json unchanged)');
         
+        // STEP 5: Display summary
         displaySummary(finalOrders);
         
         const duration = (Date.now() - startTime) / 1000;
@@ -168,7 +174,9 @@ async function main() {
         
         console.log('\n' + '='.repeat(50));
         console.log('🎉 SCRIPT COMPLETED SUCCESSFULLY!');
-        console.log('='.repeat(50) + '\n');
+        console.log('='.repeat(50));
+        console.log('\n📝 Note: Original orders.json remains unchanged');
+        console.log('📄 Updated data saved to: orders_updated.json\n');
         
     } catch (error) {
         console.error('\n❌ FATAL ERROR:', error.message);
